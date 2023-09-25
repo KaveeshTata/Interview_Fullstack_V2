@@ -1,0 +1,15 @@
+auto_gptq==0.2.2
+chromadb==0.3.22
+Flask==2.3.2
+Flask_Mail==0.9.0
+huggingface_hub==0.16.4
+openai_whisper==20230314
+PyJWT==2.8.0
+Requests==2.31.0
+SQLAlchemy==2.0.19
+torch==2.0.1
+transformers==4.31.0
+Werkzeug==2.3.6
+pydantic==1.10.11
+llama-cpp-python==0.1.78
+langchain==0.0.191

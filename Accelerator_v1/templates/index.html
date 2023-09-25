@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>LLM Accelerator</title>
+        <style>
+            .step-container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                background-color: #4CAF50;
+                border-radius: 50px;
+                padding: 10px;
+            }
+
+            .step-circle {
+                width: 30px;
+                height: 30px;
+                background-color: #007BFF;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                margin-right: 10px;
+            }
+
+            .step-name {
+                flex-grow: 1;
+                font-size: 18px;
+                margin: 0;
+                text-align: center;
+            }
+
+            .step-symbol {
+                font-size: 40px;
+                margin-right: 20px;
+                cursor: pointer;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            button {
+                padding: 10px 20px;
+                margin: 5px;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+
+            .widget {
+                margin-bottom: 20px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            input, select {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            textarea {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            .input-container {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            #add-input-button {
+                padding: 5px 10px;
+                background-color: #28a745;
+                border: none;
+                color: white;
+                cursor: pointer;
+            }
+
+            #success-message-1, #success-message-2 {
+                color: #28a745;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="step-container" id="step1">
+                <div class="step-circle">1</div>
+                <div class="step-name">Model Configuration</div>
+                <div class="step-symbol" id="symbol1" onclick="toogleStep('symbol1')">+</div>
+            </div>
+
+            <div class="widget" id="widget1" style="display: none;">
+                <p id="success-message-1"></p>
+                <form id="model-configuration-form">
+
+                    <div id="client-api-keys-container" style="display: block;">
+                        <label>Existing Client API Keys:</label>
+                        <select id="client-api-keys" name="client-api-keys"></select>
+                    </div>
+
+                    <div id="existing-model-id-container" style="display: block;">
+                        <label>Existing Model ID's</label>
+                        <select id="existing-model-ids" name="existing-model-ids"></select>
+                    </div>
+
+                    <div id="mode-container" style="display: block;">
+                        <label>Mode</label>
+                        <select id="mode-type" name="mode-type"></select>
+                    </div>
+
+                    <div id="model-id-container" style="display: block;">
+                        <label>Select Model ID</label>
+                        <select id="model-ids" name="model-ids"></select>
+                    </div>
+
+                    <div id="local-container" style="display: none;">
+                        <label>Select Local Model</label>
+                        <input type="text" id="local-model-name-input" name="local-model-name-input" readonly>
+                    </div>
+                    
+                    <div id="cloud-container" style="display: none;">
+                        <label>Select Cloud Model</label>
+                        <input type="text" id="cloud-model-name-input" name="cloud-model-name-input" readonly>
+                    </div>  
+
+                    <div id="cloud-model-container" style="display: none;">
+                        <div id="openAI-container" style="display: none;">
+                            <label>Select Engine Type</label>
+                            <input type="text" id="openAI-engine-type-input" name="openAI-engine-type-input" readonly>
+                        </div>
+
+                        <div id="azure-container" style="display: none;">
+                            <label>Select Engine Type</label>
+                            <input type="text" id="azure-engine-type-input" name="azure-engine-type-input" readonly>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" id="new_existing_clientApiKeys" onclick="toogleclientApiKeys()">Create New API Key</button>
+                        <button type="button" id="add_new_model_id" onclick="toogleNewModel()">Add New Model</button>
+                        <button type="button" id="addModelId" onclick="addModel()">Add Model</button>
+                        <button type="button" id="testModel">Test Model</button>
+                        <button type="button" id="move-to-widget-2">Prompt Selection</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="step-container" id="step2">
+                <div class="step-circle">2</div>
+                <div class="step-name">Prompt Configuration</div>
+                <div class="step-symbol" id="symbol2" onclick="toogleStep('symbol2')">+</div>
+            </div>
+
+            <div class="widget" id="widget2" style="display: none;">
+                <p id="success-message-2"></p>
+                <from id="prompt-configuration-form">
+
+                    <div id="promptIdContainer" style="display: block;">
+                        <label>Existing Prompt ID's</label>
+                        <select id="promptId" name="promptId"></select>
+                    </div>
+
+                    <div id="prompt" style="display: block;">
+                        <label>Prompt:</label>
+                        <textarea id="prompt-input" name="prompt-input" rows="4" required></textarea><br>
+                    </div>
+
+                    <div class="input-container">
+                        <label>Key:</label>
+                        <input type="text" name="input_key[]" required>
+                        <label style="margin-left: 10px;">Value:</label>
+                        <input type="text" name="input_value[]" required>
+                    </div>
+
+                    <button type="button" id="add-input-button">+</button><br><br>
+
+                    <p id="output"></p>
+
+                    <button type="button" id="check-output">Check Output</button>
+                    <button type="button" id="addModel" onclick="addModel()" style="display: none;">Add Model</button>
+                    <button type="button" id="add_new_prompt_id" onclick="toogleNewPrompt()">Add New Prompt</button>
+                    <button type="button" id="addPrompt">Add Prompt</button>
+                    <button type="button" id="back">Back</button>
+                    
+                </from>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+        <script>
+            const widget1 = document.getElementById('widget1');
+            const widget2 = document.getElementById('widget2');
+            const clientApiKeysSelect = document.getElementById('client-api-keys');
+            const modelIdsExisting = document.getElementById('existing-model-ids');
+            const modeTypeDropdown = document.getElementById('mode-type');
+            const modelIdsDropdown = document.getElementById('model-ids');
+            const localContainer = document.getElementById('local-container');
+            const cloudContainer = document.getElementById('cloud-container');
+            const cloudModelContainer = document.getElementById('cloud-model-container');
+            const azureContainer = document.getElementById('azure-container');
+            const openAIContainer = document.getElementById('openAI-container');
+            const moveToWidget2Button = document.getElementById('move-to-widget-2');
+            const promptText = document.getElementById("prompt-input");
+            const promptIdDropdown = document.getElementById("promptId");
+            const addPromptButton = document.getElementById("addPrompt");
+            const testModel = document.getElementById("testModel");
+            const backButton = document.getElementById("back");
+
+            checkClientApiKeys();
+
+            
+            function toogleStep(symbolId) {
+                const symbol = document.getElementById(symbolId);
+
+                if (symbolId === 'symbol1') {
+                    if(widget1.style.display === 'block') {
+                        widget1.style.display = 'none';
+                        symbol.textContent = '+';
+                    } else {
+                        widget1.style.display = 'block';
+                        symbol.textContent = '-';
+                        widget2.style.display = 'none';
+                        document.getElementById('symbol2').textContent = '+';
+                    }
+                } else {
+                    if(widget2.style.display === 'block') {
+                        widget2.style.display = 'none';
+                        symbol.textContent = '+';
+                    } else {
+                        widget2.style.display = 'block';
+                        symbol.textContent = '-';
+                        widget1.style.display = 'none';
+                        document.getElementById('symbol1').textContent = '+';
+                    }
+                }
+            }
+
+           async function checkClientApiKeys() {
+                const response = await fetch(`/llm/clientApiKeys`);
+                const data = await response.json();
+
+                const addedKeys = [];
+
+                clientApiKeysSelect.innerHTML = '';
+
+                // Populate the dropdown with unique server API keys
+                data.forEach(item => {
+                    if (!addedKeys.includes(item)) {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        clientApiKeysSelect.appendChild(option);
+                        addedKeys.push(item);
+                    }
+                });
+
+                updatecontainers();
+            }
+
+            function updatecontainers() {
+                if (clientApiKeysSelect.value === "") {
+                    document.getElementById('client-api-keys-container').style.display = 'none';
+                    document.getElementById('client-api-keys').innerHTML = '';
+                    document.getElementById('existing-model-id-container').style.display = 'none';
+                    document.getElementById('existing-model-ids').innerHTML = '';
+                    document.getElementById('model-id-container').style.display = 'block';
+                    document.getElementById('new_existing_clientApiKeys').style.display = 'none';
+                    document.getElementById('add_new_model_id').style.display = 'none';
+                    document.getElementById('addModelId').style.display = 'block';
+                    document.getElementById('promptIdContainer').style.display = 'none';
+                    document.getElementById('promptId').innerHTML = '';
+                    document.getElementById('addPrompt').style.display = 'none';
+                    document.getElementById('add_new_prompt_id').style.display = 'none';
+                    moveToWidget2Button.style.display = 'none';
+                    populateModeDropdown();
+                } else {
+                    document.getElementById('client-api-keys-container').style.display = 'block';
+                    document.getElementById('existing-model-id-container').style.display = 'block';
+                    document.getElementById('model-id-container').style.display = 'none';
+                    document.getElementById('model-ids').innerHTML = '';
+                    document.getElementById('new_existing_clientApiKeys').style.display = 'block';
+                    document.getElementById('new_existing_clientApiKeys').textContent = 'Create New API Key';
+                    document.getElementById('add_new_model_id').style.display = 'block';
+                    document.getElementById('addModelId').style.display = 'none';
+                    document.getElementById('promptIdContainer').style.display = 'block';
+                    document.getElementById('addPrompt').style.display = 'block';
+                    document.getElementById('add_new_prompt_id').style.display = 'block';
+                    moveToWidget2Button.style.display = 'block';
+
+                   const initialClientApi = clientApiKeysSelect.value;
+                   fetchExistingModelIds(initialClientApi)
+                   fetchPromptIds(initialClientApi)
+                }
+            }
+
+            async function populateModeDropdown() {
+            await fetch('./config.yml')
+                .then((response) => response.text())
+                .then((yamlText) => {
+                const modeData = jsyaml.load(yamlText);
+
+                modeTypeDropdown.innerHTML = '';
+
+                modeData['mode-type'].forEach((mode) => {
+                    const option = document.createElement('option');
+                    option.value = mode;
+                    option.textContent = mode;
+                    modeTypeDropdown.appendChild(option);
+                });
+
+                const initialModeType = modeTypeDropdown.value;
+                populateModelIdDropdown(initialModeType);
+                fetchcontainers(initialModeType);
+                })
+                .catch((error) => {
+                console.error('Error loading YAML file:', error);
+                });
+
+            }
+
+            modeTypeDropdown.addEventListener('change', function () {
+                const selectedModeType = modeTypeDropdown.value;
+                populateModelIdDropdown(selectedModeType);
+                fetchcontainers(selectedModeType);
+            });
+
+            function fetchcontainers(selectedModeType) {
+                if (selectedModeType === 'Local') {
+                    cloudContainer.style.display = 'none';
+                    cloudModelContainer.style.display = 'none';
+                    localContainer.style.display = 'block';
+                } else {
+                    localContainer.style.display = 'none';
+                    cloudContainer.style.display = 'block';
+                    cloudModelContainer.style.display = 'block';
+                }
+            }
+
+            function populateModelIdDropdown(selectedModeType) {
+                fetch('config.yml')
+                .then((response) => response.text())
+                .then((yamlText) => {
+                    const modelIdsData = jsyaml.load(yamlText);
+
+                    modelIdsDropdown.innerHTML = '';
+
+                    const modelIds = modelIdsData.model_ids[selectedModeType];
+
+                    modelIds.forEach((modelId) => {
+                        const option = document.createElement('option');
+                        option.value = modelId;
+                        option.textContent = modelId;
+                        modelIdsDropdown.appendChild(option);
+                    });
+                    
+                    const initialModelId = modelIdsDropdown.value;
+                    populateModelName(selectedModeType,initialModelId);
+                })
+                .catch((error) => {
+                    console.error('Error loading YAML file:',error);
+                });
+            }
+
+            modelIdsDropdown.addEventListener('change', function () {
+                const selectedModelId = modelIdsDropdown.value;
+                const selectedModeType = modeTypeDropdown.value;
+                populateModelName(selectedModeType,selectedModelId);
+            });
+
+            function populateModelName (selectedModeType, selectedModelId) {
+                let modelNameField;
+                if (selectedModeType === 'Local') {
+                    modelNameField = document.getElementById('local-model-name-input');
+                } else {
+                    modelNameField = document.getElementById('cloud-model-name-input');
+                }
+
+                fetch('config.yml')
+                    .then((response) => response.text())
+                    .then((yamlText) => {
+                        const modelNameData = jsyaml.load(yamlText);
+
+                        const modelName = modelNameData.model_names[selectedModeType][selectedModelId];
+
+                        modelNameField.value = modelName;
+                        const selectedModelName = modelNameField.value;
+
+                        if (selectedModeType === 'Cloud') {
+                            populateEngine(selectedModelName, selectedModelId);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error loading YAML file:', error);
+                    });
+            }
+
+            function populateEngine(modelName, selectedModelId) {
+                let engineContainer;
+                if (modelName === 'Azure') {
+                    engineContainer = document.getElementById('azure-container');
+                    openAIContainer.style.display = 'none';
+                    azureContainer.style.display = 'block';
+                } else {
+                    engineContainer = document.getElementById('openAI-container');
+                    azureContainer.style.display = 'none';
+                    openAIContainer.style.display = 'block';
+                }
+
+                const engineFeild = engineContainer.querySelector('input'); // Assuming you have an input field in each container
+
+                fetch('config.yml')
+                    .then((response) => response.text())
+                    .then((yamlText) => {
+                        const engineData = jsyaml.load(yamlText);
+
+                        const engineName = engineData.engines[modelName][selectedModelId]; // Assuming engine name is inside an array
+
+                        engineFeild.value = engineName;
+                    })
+                    .catch((error) => {
+                        console.error('Error loading YAML file:', error);
+                    });
+            }
+
+            async function addModel() {
+                let modelId;
+                if (modelIdsExisting.value === '') {
+                    modelId = modelIdsDropdown.value;
+                } else {
+                    modelId = modelIdsExisting.value;
+                }
+                const clientApiKey = clientApiKeysSelect.value;
+                const modeType = modeTypeDropdown.value;
+
+                const jsonData = {};
+                jsonData["clientApiKey"] = clientApiKey;
+                jsonData["modelId"] = modelId;
+                jsonData["modeType"] = modeType;
+
+                await fetch("/llm/addModelId", {
+                    method : "POST",
+                    body : JSON.stringify(jsonData),
+                    headers : {
+                        "Content-Type" : "application/json"
+                    }
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (widget1.style.display === 'none'){
+                        widget1.style.display = 'block';
+                        widget2.style.display = 'none';
+                        document.getElementById('promptIdContainer').style.display = 'block';
+                        document.getElementById('symbol1').textContent = '-';
+                        document.getElementById('symbol2').textContent = '+';
+                        document.getElementById('addPrompt').style.display = 'block';
+                        document.getElementById('addModel').style.display = 'none';
+                    }
+                    document.getElementById("success-message-1").innerText = data;
+                })
+                .catch(error => {
+                    console.error("Error: ",error);
+                });
+
+                checkClientApiKeys();
+
+            };
+
+            function toogleNewModel() {
+                const button = document.getElementById("add_new_model_id");
+                const container = document.getElementById("existing-model-id-container");
+
+                if (container.style.display === 'block') {
+                    button.textContent = 'Show Existing Models';
+                    container.style.display = 'none';
+                    modelIdsExisting.innerHTML = '';
+                    modeTypeDropdown.innerHTML = '';
+                    document.getElementById('addModelId').style.display = 'block';
+                    document.getElementById("model-id-container").style.display = 'block';
+                    document.getElementById("new_existing_clientApiKeys").style.display = 'none';
+                    moveToWidget2Button.style.display = 'none';
+                    populateModeDropdown();
+                } else {
+                    button.textContent = 'Add New Model';
+                    container.style.display = 'block';
+                    document.getElementById("model-id-container").style.display = 'none';
+                    document.getElementById('addModelId').style.display = 'none';
+                    document.getElementById("new_existing_clientApiKeys").style.display = 'block';
+                    moveToWidget2Button.style.display = 'block';
+                    checkClientApiKeys();
+                }
+            }
+
+            function toogleclientApiKeys() {
+                const button = document.getElementById('new_existing_clientApiKeys')
+                const container = document.getElementById('client-api-keys-container')
+
+                if (container.style.display === 'block') {
+                    button.textContent = 'Show Existing API Keys';
+                    container.style = 'none';
+                    document.getElementById('client-api-keys').innerHTML = '';
+                    updatecontainers();
+                    button.style.display = 'block';
+                } else {
+                    button.textContent = 'Creat New API Key';
+                    container.style = 'none';
+                    checkClientApiKeys();
+                }
+            }
+
+            async function fetchExistingModelIds(clientApiKey) {
+                const response = await fetch(`/llm/modelIds?clientApiKey=${clientApiKey}`);
+                const data = await response.json();
+
+                modelIdsExisting.innerHTML = '';
+
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    modelIdsExisting.appendChild(option);
+                });
+
+                const selectedModelId = modelIdsExisting.value;
+                fetchModeType(selectedModelId)
+            }
+
+            async function fetchModeType(modelId) {
+                clientApiKey = clientApiKeysSelect.value;
+                const response = await fetch(`/llm/modeType?clientApiKey=${clientApiKey}&modelId=${modelId}`);
+                const data = await response.json();
+
+                modeTypeDropdown.innerHTML = '';
+
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    modeTypeDropdown.appendChild(option);
+                });
+
+                const initialModeType = modeTypeDropdown.value;
+                fetchcontainers(initialModeType);
+                const initialModeId = modelIdsExisting.value;
+                populateModelName(initialModeType,initialModeId);
+
+            }
+
+            modelIdsExisting.addEventListener('change', function (){
+                const selectedClientApi = modelIdsExisting.value;
+                fetchModeType(selectedClientApi);
+            });
+
+            async function fetchPromptIds(clientApiKey) {
+                const response = await fetch(`/llm/promptIds?clientApiKey=${clientApiKey}`);
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    promptIdDropdown.innerHTML = '';
+                    promptText.value = '';
+                    const option = document.createElement('option');
+                    option.value = "None";
+                    option.textContent = "None";
+                    promptIdDropdown.appendChild(option);
+                    addPromptButton.style.display = 'block';
+                    promptText.readOnly = false;
+                    document.getElementById('add_new_prompt_id').style.display = 'none';
+                } else {
+                    document.getElementById('add_new_prompt_id').style.display = 'block';
+                    promptIdDropdown.innerHTML = '';
+                    promptText.readOnly = true;
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        promptIdDropdown.appendChild(option);
+                    });
+                    addPromptButton.style.display = 'none';
+                    const initialPromptId = promptIdDropdown.value;
+                    fetchPrompt(initialPromptId);
+                }
+            }
+
+            async function fetchPrompt(selectedPromptId) {
+                const clientApiKey = clientApiKeysSelect.value;
+                const response = await fetch(`/llm/prompt?promptId=${selectedPromptId}&clientApiKey=${clientApiKey}`);
+                const data = await response.json();
+
+                promptText.innerHTML = '';
+
+                data.forEach(item => {
+                    promptText.value = item;
+                });
+
+                promptText.readOnly = true;
+            }
+
+            promptIdDropdown.addEventListener('change', function() {
+                const selectedPromptId = promptIdDropdown.value;
+                fetchPrompt(selectedPromptId);
+            });
+
+            clientApiKeysSelect.addEventListener('change', function (){
+                const selectedClientApi = clientApiKeysSelect.value;
+                fetchExistingModelIds(selectedClientApi);
+                fetchPromptIds(selectedClientApi)
+            });
+
+            testModel.addEventListener('click', function () {
+                widget1.style.display = 'none';
+                widget2.style.display = 'block';
+                document.getElementById('promptIdContainer').style.display = 'none';
+                document.getElementById('symbol1').textContent = '+';
+                document.getElementById('symbol2').textContent = '-';
+                document.getElementById('addPrompt').style.display = 'none';
+                document.getElementById('addModel').style.display = 'block';
+            });
+
+            backButton.addEventListener('click', function () {
+                widget1.style.display = 'block';
+                widget2.style.display = 'none';
+                document.getElementById('promptIdContainer').style.display = 'block';
+                document.getElementById('symbol1').textContent = '-';
+                document.getElementById('symbol2').textContent = '+';
+                document.getElementById('addPrompt').style.display = 'block';
+                document.getElementById('addModel').style.display = 'none';
+            });
+
+            moveToWidget2Button.addEventListener('click', function () {
+                widget1.style.display = 'none';
+                document.getElementById('symbol1').textContent = '+';
+                widget2.style.display = 'block';
+                document.getElementById('symbol2').textContent = '-'
+            })
+
+            const addInputButton = document.getElementById("add-input-button");
+            const inputsForm = document.getElementById("prompt-configuration-form");
+            addInputButton.addEventListener("click", function() {
+                const inputDiv = document.createElement("div");
+                inputDiv.innerHTML = `
+                    <div class="input-container">
+                        <label>Key:</label>
+                        <input type="text" name="input_key[]" required>
+                        <label style="margin-left: 10px;">Value:</label>
+                        <input type="text" name="input_value[]" required>
+                    </div>
+                `;
+                inputsForm.insertBefore(inputDiv, addInputButton);
+            });
+            
+            document.getElementById("check-output").addEventListener("click", function() {
+                let modelId;
+                if (modelIdsExisting.value === '') {
+                    modelId = modelIdsDropdown.value;
+                } else {
+                    modelId = modelIdsExisting.value;
+                }
+                const modeType = modeTypeDropdown.value;
+                const prompt = promptText.value;
+                const inputKeys = document.querySelectorAll('[name = "input_key[]"]');
+                const inputValues = document.querySelectorAll('[name = "input_value[]"]');
+
+
+                const jsonData = {};
+                jsonData["modeType"] = modeType;
+                jsonData["modelId"] = modelId;
+                jsonData["prompt"] = prompt;
+                for (let i = 0; i < inputKeys.length; i++) {
+                    jsonData[inputKeys[i].value] = inputValues[i].value;
+                }
+
+                fetch("/llm/output", {
+                    method: "POST",
+                    body: JSON.stringify(jsonData),
+                    headers: {
+                        "Content-Type" : "application/json"
+                    }
+                })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("output").innerText = data;
+                })
+                .catch(error => {
+                    console.error("Error:",error);
+                });
+
+            });
+
+            document.getElementById("addPrompt").addEventListener("click", function() {
+                const clientApiKey = clientApiKeysSelect.value;
+                const prompt = promptText.value;
+
+                const jsonData = {};
+                jsonData["clientApiKey"] = clientApiKey;
+                jsonData["prompt"] = prompt;
+
+                fetch("/llm/addPrompt", {
+                    method : "POST",
+                    body : JSON.stringify(jsonData),
+                    headers : {
+                        "Content-Type" : "application/json"
+                    }
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if(document.getElementById('promptIdContainer').style.display === 'none'){
+                        document.getElementById('promptIdContainer').style.display = 'block';
+                        document.getElementById("add_new_prompt_id").textContent = 'Add New Prompt';
+                        document.getElementById('back').style.display = 'block';
+                    }
+                    document.getElementById("success-message-2").innerText = data;
+                })
+                .catch(error => {
+                    console.error("Error: ",error);
+                });
+                fetchPromptIds(clientApiKey);
+            });
+
+            function toogleNewPrompt() {
+                const button = document.getElementById("add_new_prompt_id");
+                const container = document.getElementById("promptIdContainer");
+
+                if (container.style.display === 'block') {
+                    button.textContent = 'Show Existing Prompts';
+                    promptText.readOnly = false;
+                    container.style.display = 'none';
+                    promptIdDropdown.innerHTML = '';
+                    promptText.value = '';
+                    document.getElementById('addPrompt').style.display = 'block';
+                    document.getElementById('back').style.display = 'none';
+                } else {
+                    button.textContent = 'Add New Prompt';
+                    container.style.display = 'block';
+                    promptIdDropdown.innerHTML = '';
+                    promptText.value = '';
+                    document.getElementById('addPrompt').style.display = 'none';
+                    fetchPromptIds(clientApiKeysSelect.value);
+                    document.getElementById('back').style.display = 'block';
+                }
+            }
+            
+        </script>
+
+    </body>
+</html>

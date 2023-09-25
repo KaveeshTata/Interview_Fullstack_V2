@@ -1,0 +1,2 @@
+docker build -t lpcdocks/interview_fullstack .
+docker images

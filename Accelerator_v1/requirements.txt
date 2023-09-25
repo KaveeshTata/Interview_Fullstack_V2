@@ -1,0 +1,15 @@
+auto_gptq==0.2.2
+chromadb==0.3.22
+fastapi==0.103.1
+Flask==2.3.2
+huggingface_hub==0.16.4
+langchain==0.0.286
+openai==0.27.9
+python-dotenv==1.0.0
+PyYAML==6.0
+PyYAML==6.0.1
+Requests==2.31.0
+torch==2.0.1
+transformers==4.31.0
+uvicorn==0.23.2
+Werkzeug==2.3.6

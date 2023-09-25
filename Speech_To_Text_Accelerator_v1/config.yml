@@ -1,0 +1,17 @@
+mode-type:
+  - Transcribe
+  - Translate
+
+model-names:
+  Transcribe:
+    - tiny
+    - base
+    - small
+    - medium
+    - large
+  Translate:
+    - tiny
+    - base
+    - small
+    - medium
+    - large

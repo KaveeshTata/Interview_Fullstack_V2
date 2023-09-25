@@ -1,0 +1,39 @@
+{
+    "LogoSource": "/Brillius_technologies.png",
+    "LogoAlt": "Brillius Technologies",
+    "LogoWidth": "70%",
+    "Login": {
+        "Heading": "Login to your account"
+    },
+    "AdminHome": {
+        "Heading": "Admin Homepage"
+    },
+    "UserHome": {
+        "Heading": "User Homepage"
+    },
+    "Audio": {
+        "Heading": "Audio Session"
+    },
+    "SessionDuration": "6",
+    "Video": {
+        "Heading": "Video Session"
+    },
+    "Dashboard": {
+        "Heading": "Dashboard"
+    },
+    "UserRegistration": {
+        "Heading": "User Registration"
+    },
+    "Results": {
+        "Heading": "Results"
+    },
+    "PasswordUpdate": {
+        "Heading": "Update Password"
+    },
+    "OtpVerification": {
+        "Heading": "OTP Verification"
+    },
+    "PasswordReset": {
+        "Heading": "Password Reset"
+    }
+}

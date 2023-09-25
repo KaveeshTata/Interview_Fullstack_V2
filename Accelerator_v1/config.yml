@@ -1,0 +1,54 @@
+mode-type:
+  - Local
+  - Cloud
+
+model_ids:
+  Local:
+    - Model-1
+    - Model-2
+
+  Cloud:
+    - Model-1
+    - Model-2
+    - Model-3
+    - Model-4
+
+model_names:
+  Local:
+    Model-1: llama-2-7b-chat
+    Model-2: llama-2-70b-chat
+  
+  Cloud:
+    Model-1: Azure
+    Model-2: Azure
+    Model-3: OpenAI
+    Model-4: OpenAI
+
+engines:
+  Azure:
+    Model-1: gpt-3.5-turbo
+    Model-2: GPT-4
+  OpenAI:
+    Model-3: gpt-3.5-turbo
+    Model-4: GPT-4
+
+models:
+  Local:
+    Model-1:
+      Model-Name: llama-2-7b-chat
+    Model-2:
+      Model-Name: llama-2-70b-chat
+  Cloud:
+    Model-1:
+      Model-Name: Azure
+      Engine: gpt-3.5-turbo
+    Model-2:
+      Model-Name: Azure
+      Engine: gpt-4
+    Model-3:
+      Model-Name: OpenAI
+      Engine: gpt-3.5-turbo
+    Model-4:
+      Model-Name: OpenAI
+      Engine: gpt-4
+  

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speech-to-Text Configuration</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" type="text/css" href="../static/styles.css" />
+    <script>
+      function submitAddConfigForm(event) {
+        event.preventDefault(); // Prevent the form from submitting in the traditional way
+
+        // Retrieve selected mode and model
+        var modeSelect = document.getElementById("modeSelect");
+        var mode = modeSelect.options[modeSelect.selectedIndex].value;
+
+        var modelSelect = document.getElementById("modelSelect");
+        var model = modelSelect.options[modelSelect.selectedIndex].value;
+
+        // Prepare data to send to app.py
+        var data = {
+          mode: mode,
+          model: model,
+        };
+
+        // Send data to app.py using fetch
+        fetch("/add_config", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            alert(
+              "API Key: " +
+                data.api_key +
+                ", Mode: " +
+                data.mode +
+                ", Model: " +
+                data.model
+            );
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Speech-to-Text Configuration</h1>
+
+    <!-- Add New Configuration Form -->
+    <div id="addConfigForm" style="display: none">
+      <h2>Add New Configuration</h2>
+
+      <form id="configForm" onsubmit="submitAddConfigForm(event)">
+        <label for="modeSelect">Select Mode:</label>
+        <select id="modeSelect" name="mode">
+          <option value="Transcribe">Transcribe</option>
+          <option value="Translate">Translate</option>
+        </select>
+
+        <br />
+
+        <label for="modelSelect">Select Model:</label>
+        <select id="modelSelect" name="model">
+          <option value="tiny">tiny</option>
+          <option value="base">base</option>
+          <option value="small">small</option>
+          <option value="medium">medium</option>
+          <option value="large">large</option>
+        </select>
+
+        <br />
+
+        <button type="submit" class="button-style">Submit</button>
+      </form>
+    </div>
+
+    <!-- Update Existing Configuration Form -->
+    <div id="updateConfigForm" style="display: none">
+      <h2>Update Existing Configuration</h2>
+
+      <form id="updateConfigForm" onsubmit="submitUpdateConfigForm(event)">
+        <label for="apiKeySelectUpdate">Select API Key:</label>
+        <select id="apiKeySelectUpdate" name="apiKey">
+          <!-- JavaScript will populate this select menu with API keys -->
+        </select>
+
+        <br />
+
+        <label for="modeSelectUpdate">Select Mode:</label>
+        <select id="modeSelectUpdate" name="mode">
+          <option value="Transcribe">Transcribe</option>
+          <option value="Translate">Translate</option>
+        </select>
+
+        <br />
+
+        <label for="modelSelectUpdate">Select Model:</label>
+        <select id="modelSelectUpdate" name="model">
+          <option value="tiny">tiny</option>
+          <option value="base">base</option>
+          <option value="small">small</option>
+          <option value="medium">medium</option>
+          <option value="large">large</option>
+        </select>
+
+        <br />
+
+        <button type="submit" class="button-style">Submit</button>
+      </form>
+      <script>
+        // Populate API key select menu
+        fetch("/get_api_keys")
+          .then((response) => response.json())
+          .then((data) => {
+            var apiKeySelectUpdate =
+              document.getElementById("apiKeySelectUpdate");
+            data.api_keys.forEach((apiKey) => {
+              var option = document.createElement("option");
+              option.value = apiKey;
+              option.textContent = apiKey;
+              apiKeySelectUpdate.appendChild(option);
+            });
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+
+        function submitUpdateConfigForm(event) {
+          event.preventDefault(); // Prevent the form from submitting in the traditional way
+
+          // Retrieve selected API key, mode, and model
+          var apiKeySelectUpdate =
+            document.getElementById("apiKeySelectUpdate");
+          var apiKey =
+            apiKeySelectUpdate.options[apiKeySelectUpdate.selectedIndex].value;
+
+          var modeSelectUpdate = document.getElementById("modeSelectUpdate");
+          var mode =
+            modeSelectUpdate.options[modeSelectUpdate.selectedIndex].value;
+
+          var modelSelectUpdate = document.getElementById("modelSelectUpdate");
+          var model =
+            modelSelectUpdate.options[modelSelectUpdate.selectedIndex].value;
+
+          // Prepare data to send to app.py
+          var data = {
+            apiKey: apiKey,
+            mode: mode,
+            model: model,
+          };
+
+          // Send data to app.py using fetch
+          fetch("/update_config", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert(
+                "Updated Configuration for API Key: " +
+                  data.apiKey +
+                  ", Mode: " +
+                  data.mode +
+                  ", Model: " +
+                  data.model
+              );
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+      </script>
+    </div>
+
+    <!-- View All Existing Configurations (You can add this if needed) -->
+
+    <button id="addConfigBtn">Add New Config</button>
+    <button id="updateConfigBtn">Update Existing Config</button>
+    <button id="viewAllConfigBtn">View All Existing Configurations</button>
+
+    <script src="../static/scripts.js"></script>
+  </body>
+</html>
