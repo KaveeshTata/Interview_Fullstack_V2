@@ -14,7 +14,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         // Fetch the list of users from your server
-        fetch("http://localhost:3001/initialdashboard") // Replace with your actual API endpoint
+        fetch("/initialdashboard") // Replace with your actual API endpoint
             .then((response) => response.json())
             .then((data) => {
                 setUsers(data.usernames);
@@ -25,7 +25,7 @@ export default function Dashboard() {
     useEffect(() => {
         // Fetch sessions data when loginState.user changes
         if (loginState.user) {
-            fetch("http://localhost:3001/get_sessions", {
+            fetch("/get_sessions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -66,7 +66,7 @@ export default function Dashboard() {
             console.log(requestData)
     
             // Make an HTTP POST request to your server-side route
-            const response = await fetch('http://localhost:3001/dashboardtransactions', {
+            const response = await fetch('/dashboardtransactions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -163,8 +163,6 @@ export default function Dashboard() {
                     }}>
                         <thead>
                             <tr>
-                                {/* <th style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>Username</th>
-                                <th style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>SessionID</th> */}
                                 <th style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>Question ID</th>
                                 <th style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>Video Flag</th>
                                 <th style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>Prompt Flag</th>
@@ -175,8 +173,6 @@ export default function Dashboard() {
                         <tbody>
                             {transactions.map((transaction, index) => (
                                 <tr key={index}>
-                                    {/* <td style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>{transaction.username}</td>
-                                    <td style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>{transaction.sessionId}</td> */}
                                     <td style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>{transaction.questionId}</td>
                                     <td style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>{getFlagSymbol(transaction.videoFlag)}</td>
                                     <td style={{ border: '1.5px solid #ddd', textAlign: 'center' }}>{getFlagSymbol(transaction.promptFlag)}</td>

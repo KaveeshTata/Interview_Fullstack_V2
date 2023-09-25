@@ -12,7 +12,6 @@ export default function VideoRecorder() {
     const mediaRecorder = useRef(null);
     const liveVideoFeed = useRef(null);
     const [recordingStatus, setRecordingStatus] = useState("inactive");
-    // eslint-disable-next-line
     const [recordedVideo, setRecordedVideo] = useState(null);
     const [videoChunks, setVideoChunks] = useState([]);
 
@@ -23,7 +22,7 @@ export default function VideoRecorder() {
         // Function to fetch questions from the /getquestionsfromapi route
         const fetchQuestionsFromAPI = async () => {
             try {
-                const response = await axios.post("http://localhost:3001/getquestionsfromapi");
+                const response = await axios.post("/getquestionsfromapi");
                 if (response.status === 200) {
                     const { questions: fetchedQuestions } = response.data;
                     questions.splice(0, questions.length, ...fetchedQuestions); // Replace the existing questions array with the fetched questions
@@ -97,8 +96,8 @@ export default function VideoRecorder() {
     };
 
     const startRecording = async () => {
-
         setRecordingStatus("recording");
+        setRecordedVideo(null);
         const media = new MediaRecorder(stream, { mimeType });
         mediaRecorder.current = media;
         mediaRecorder.current.start();
@@ -116,6 +115,7 @@ export default function VideoRecorder() {
     const stopRecording = async () => {
         setRecordingStatus("inactive");
         mediaRecorder.current.stop();
+        setRemainingTime(configData.SessionDuration);
         mediaRecorder.current.onstop = async () => {
             const videoBlob = new Blob(videoChunks, { type: mimeType });
             const videoUrl = URL.createObjectURL(videoBlob);
@@ -126,7 +126,7 @@ export default function VideoRecorder() {
                 formData.append("video", videoFile);
                 formData.append("quesNumber", quesNumber); // Add quesNumber to the FormData
                 console.log(quesNumber)
-                const response = await axios.post("http://localhost:3001/upload", formData, {
+                const response = await axios.post("/upload", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
@@ -156,7 +156,8 @@ export default function VideoRecorder() {
     const handleNextQues = () => {
         console.log("Next Question Button working");
         setQuesNumber(quesNumber + 1);
-        setVideoChunks(null); // Reset the video state
+        // setVideoChunks(null); // Reset the video state
+        setRecordedVideo(null); // Reset the video state
     };
 
     const handleFinish = () => {
@@ -177,12 +178,6 @@ export default function VideoRecorder() {
                 {questions[quesNumber - 1]}
             </div>
 
-            {permission && (
-                <div className="mt-2 text-center text-sm text-gray-600 mt-5" id="timer">
-                    {formatTime(remainingTime)}
-                </div>
-            )}
-
             <div className="video-player">
                 <br />
                 {permission && (
@@ -198,7 +193,13 @@ export default function VideoRecorder() {
                     </div>
                 ) : null}
             </div>
-            <br />
+
+            {permission && (
+                <div className="mt-2 text-center text-sm text-gray-600 mt-5" id="timer">
+                    {formatTime(remainingTime)}
+                </div>
+            )}
+            <br/>
 
             <div className="video-controls flex justify-center">
                 <button

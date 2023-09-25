@@ -1,2 +1,2 @@
-Question ID: 82 Question: What is Kubernetes, and why is it used for container orchestration?
-Question ID: 20 Question: How does AWS IAM work, and what are IAM roles used for?
+Question ID: 61 Question: How does Kubernetes handle node failures and rescheduling pods?
+Question ID: 13 Question: How does Kubernetes handle persistent storage for containers?

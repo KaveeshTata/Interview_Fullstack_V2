@@ -515,24 +515,6 @@ def create_user(username, password, email, roles, firstname=None, lastname=None,
     session.commit()
     return new_user
 
-def authenticate_user(username, password, session):
-    user = session.query(User).filter_by(username=username).first()
-
-    if user:
-        stored_hash = user.password  # Assuming that user.password contains the stored hash
-
-        if check_password_hash(stored_hash, password):  # Use check_password_hash for 'sha256' hashing
-            roles = json.loads(user.roles)
-            
-            if 'admin' in roles:
-                return {'status': 'success', 'message': 'Authentication successful', 'roles': 'admin'}
-            elif 'user' in roles:
-                return {'status': 'success', 'message': 'Authentication successful', 'roles': 'user'}
-        else:
-            return {'status': 'error', 'message': 'Invalid password', 'roles': 'none'}
-    else:
-        return {'status': 'error', 'message': 'Invalid username', 'roles': 'none'}
-
 def check_user_roles(user):
     roles = json.loads(user.roles)
 

@@ -26,7 +26,7 @@ export default function AdminHome() {
 
         try {
             // Send a POST request to the `/submit_number` route
-            const response = await fetch("http://localhost:3001/submit_number", {
+            const response = await fetch("/submit_number", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

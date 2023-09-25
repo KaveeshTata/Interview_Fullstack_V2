@@ -11,7 +11,7 @@ export default function Dashboard() {
             try {
                 setLoading(true);
 
-                const response = await fetch("http://localhost:3001/summary"); // Assuming your backend is running on the same host
+                const response = await fetch("/summary"); // Assuming your backend is running on the same host
                 if (response.ok) {
                     const data = await response.json();
                     setQuestions(data.questions);
@@ -31,7 +31,7 @@ export default function Dashboard() {
 
         try {
             // Make an HTTP POST request using fetch
-            const response = await fetch("http://localhost:3001/create_session", {
+            const response = await fetch("/create_session", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -27,7 +27,7 @@ export default function Login() {
         const usernameInput = loginState.username;
         const passwordInput = loginState.password;
 
-        fetch("http://localhost:3001/login", {
+        fetch("/login", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,9 +38,6 @@ export default function Login() {
                 if (response.ok) {
                     const userData = await response.json();
                     console.log(`Valid ${userData.role} login`);
-
-                    // Send the username to server.js using an HTTP POST request
-
                     window.location.href = `/${userData.role}home`;
                 } else {
                     console.log("Invalid login");
@@ -55,7 +52,7 @@ export default function Login() {
     return (
         <div>
             {showFlashMessage && (
-                <div id="flashMsg">
+                <div id="failFlashMsg">
                     Invalid login credentials. Please try again.
                 </div>
             )}

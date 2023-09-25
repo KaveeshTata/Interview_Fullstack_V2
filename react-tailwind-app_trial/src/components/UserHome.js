@@ -12,7 +12,7 @@ export default function UserHome() {
     const handleSubmit = (e) => {
         e.preventDefault();
         // First, call the createUserDirectories route with the selected option
-        fetch("http://localhost:3001/create_user_directory", {
+        fetch("/create_user_directory", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -29,7 +29,7 @@ export default function UserHome() {
                 console.log("Response from createUserDirectories:", data);
 
                 // Now, fetch the timestamp
-                return fetch("http://localhost:3001/timestamps", {
+                return fetch("/timestamps", {
                     method: "POST",
                 });
             })

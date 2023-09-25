@@ -6,6 +6,7 @@ const fs = require('fs');
 const session = require('express-session');
 const crypto = require('crypto');
 const cheerio = require('cheerio');
+const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3001;
@@ -68,7 +69,7 @@ app.get('/adminhome', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
-app.get('/userregistration', (req, res) => {
+app.get('/userregistration',tokenRequired, (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
@@ -86,37 +87,67 @@ app.get('/video', (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-    const username = req.body.username
-    const password = req.body.password
-    globalUsername = username
-    // req.session.username = username;
-    data = {
-        username: username,
-        password: password
-    }
+    const username = req.body.username;
+    const password = req.body.password;
     try {
-        // Send a POST request to your Flask backend for login
-        const response = await axios.post('http://127.0.0.1:5001/api/login', data);
+        // Make a POST request to the backend login API
+        const api_url = 'http://127.0.0.1:5001/api/login'; // Replace with your actual backend API URL
+        const response = await axios.post(api_url, { username, password });
 
         if (response.status === 200) {
-            // Authentication successful, return the user's role and a 200 status code
-            res.status(200).json({ role: response.data.roles });
+            const user_data = response.data;
+            console.log(user_data)
+            // Store user data in session
+            req.session.access_token = user_data.access_token;
+            req.session.refresh_token = user_data.refresh_token;
+            req.session.username = user_data.username;
+            req.session.userrole = user_data.roles;
+            res.status(200).json({ role: user_data.roles })
         } else {
-            // Authentication failed, return the error message and status code from the backend
-            res.status(response.status).json({ message: response.data.message });
+            // Return an error status code
+            res.status(400).end();
         }
     } catch (error) {
-        console.error(error);
-        res.sendStatus(500); // Send a 500 Internal Server Error status code
+        console.error('Error:', error.message);
+        // Return an error status code
+        res.status(500).end();
     }
 });
 
-app.get('/get', (req, res) => {
-    const sessionData = req.session;
-    res.json(sessionData);
-});
+function tokenRequired(req, res, next) {
+    const token = req.session.access_token;
+    console.log(`Received token: ${token}`);
 
-app.post('/register', async (req, res) => {
+    if (!token) {
+        console.log("Token is missing.");
+        return res.status(401).json({ message: 'A valid token is missing' });
+    }
+
+    // Debugging the token format and content
+    console.log("Token length:", token.length);
+    console.log("Token content:", token);
+
+    // Replace 'your_secret_key' with the actual secret key used in your backend
+
+    try {
+        const data = jwt.verify(token, app.config['SECRET_KEY'], { algorithms: ["HS256"] });
+        console.log("Decoded token data:", data);
+        const username = data.username; // Retrieve 'username' from the token payload
+        console.log("Username from token:", username);
+        req.username = username; // Attach 'username' to the request object
+        next(); // Call the next middleware or route handler
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            console.log("Token has expired.");
+            return res.status(401).json({ message: 'Token has expired' });
+        } else {
+            console.log("Token is invalid.");
+            return res.status(401).json({ message: 'Token is invalid' });
+        }
+    }
+}
+
+app.post('/register',async (req, res) => {
     try {
         // Extract form data or JSON data from the frontend (adjust as needed)
         const details = {
@@ -136,6 +167,8 @@ app.post('/register', async (req, res) => {
 
         if (response.status === 200) {
             res.status(200).end(); // Registration successful
+        } else if (response.status === 400) {
+            res.status(400).end();
         } else {
             res.status(500).end(); // Error registering
         }
@@ -215,7 +248,7 @@ app.post('/update_password', async (req, res) => {
 
 app.post('/upload', upload.single('video'), (req, res) => {
 
-    const username = globalUsername; // Assuming you have user sessions set up
+    const username = req.session.username; // Assuming you have user sessions set up
 
     if (username in sessionTimestamps) {
         const sessionTimestamp = sessionTimestamps[username];
@@ -245,7 +278,8 @@ app.post('/upload', upload.single('video'), (req, res) => {
 });
 
 app.post('/upload-audio', upload.single('audio'), (req, res) => {
-    const username = globalUsername; // Assuming you have user sessions set up
+    const username = req.session.username; // Assuming you have user sessions set up
+    console.log(username);
     console.log("Entered uploading")
     if (username in sessionTimestamps) {
         const sessionTimestamp = sessionTimestamps[username];
@@ -266,8 +300,7 @@ app.post('/upload-audio', upload.single('audio'), (req, res) => {
                 console.error('Error moving audio file:', err);
                 res.status(500).json({ error: 'Error uploading the audio' });
             } else {
-                const audioUrl = `http://localhost:${port}/uploads/${filename}`;
-                res.status(200).json({ audioUrl });
+                res.status(200).end();
             }
         });
     } else {
@@ -276,7 +309,7 @@ app.post('/upload-audio', upload.single('audio'), (req, res) => {
 });
 
 app.post('/timestamps', (req, res) => {
-    const username = globalUsername; // Retrieve username from session
+    const username = req.session.username; // Retrieve username from session
     console.log(username)
     if (!username) {
         res.status(400).json({ error: 'Username is required' });
@@ -294,7 +327,7 @@ app.post('/timestamps', (req, res) => {
 });
 
 app.post('/create_user_directory', (req, res) => {
-    const username = globalUsername;
+    const username = req.session.username;
     console.log(username)
     if (!username) {
         return res.status(400).json({ message: "Invalid request" });
@@ -353,7 +386,7 @@ app.post('/getquestionsfromapi', async (req, res) => {
 
 app.post('/create_session', async (req, res) => {
     try {
-        const username = globalUsername; // Assuming you have session management middleware
+        const username = req.session.username;// Assuming you have session management middleware
         if (username in sessionTimestamps) {
             const sessionTimestamp = sessionTimestamps[username];
             const newuserdirectorypath = path.join(userDirectoriesPath, username)
@@ -391,7 +424,7 @@ app.post('/create_session', async (req, res) => {
 
 app.get('/summary', async (req, res) => {
     const summaryTable = [];
-    const username = globalUsername; // Assuming you have user sessions set up
+    const username = req.session.username; // Assuming you have user sessions set up
 
     if (username in sessionTimestamps) {
         const sessionTimestamp = sessionTimestamps[username];

@@ -25,7 +25,7 @@ export default function AudioRecorder() {
         // Function to fetch questions from the /getquestionsfromapi route
         const fetchQuestionsFromAPI = async () => {
             try {
-                const response = await axios.post("http://localhost:3001/getquestionsfromapi");
+                const response = await axios.post("/getquestionsfromapi");
                 if (response.status === 200) {
                     const { questions: fetchedQuestions } = response.data;
                     questions.splice(0, questions.length, ...fetchedQuestions); // Replace the existing questions array with the fetched questions
@@ -40,7 +40,7 @@ export default function AudioRecorder() {
         // Call the function to fetch questions when the component mounts
         fetchQuestionsFromAPI();
     }, [questions]);
-    
+
     useEffect(() => {
         if (recordingStatus === "recording" && !timerIdRef.current) {
             // Start the timer when recording starts
@@ -110,6 +110,7 @@ export default function AudioRecorder() {
     const stopRecording = async () => {
         setRecordingStatus("inactive");
         mediaRecorder.current.stop();
+        setRemainingTime(configData.SessionDuration);
         mediaRecorder.current.onstop = async () => {
             const audioBlob = new Blob(audioChunks, { type: mimeType });
             const audioUrl = URL.createObjectURL(audioBlob);
@@ -120,7 +121,7 @@ export default function AudioRecorder() {
                 formData.append("audio", audioFile);
                 formData.append("quesNumber", quesNumber); // Add quesNumber to the FormData
                 console.log(quesNumber);
-                const response = await axios.post("http://localhost:3001/upload-audio", formData, {
+                const response = await axios.post("/upload-audio", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
