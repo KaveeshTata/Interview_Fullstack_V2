@@ -11,6 +11,8 @@ const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3001;
 const host = process.env.HOST || '0.0.0.0';
+const configData = require('./config.json');
+
 app.use(
     session({
         secret: crypto.randomBytes(32).toString('hex'), // Replace with your own secret key
@@ -19,15 +21,16 @@ app.use(
     })
 );
 
+
 app.use(cors());
 app.use(express.json());
 
+const API_URL = configData.API_URL
 const storage = multer.diskStorage({
     destination: './uploads/',
 });
 const upload = multer({ storage });
 const sessionTimestamps = {};
-let globalUsername = null;
 let number_of_questions;
 const qid = [];
 let questions = [];
@@ -69,7 +72,7 @@ app.get('/adminhome', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
-app.get('/userregistration',tokenRequired, (req, res) => {
+app.get('/userregistration', tokenRequired, (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
@@ -91,7 +94,7 @@ app.post('/login', async (req, res) => {
     const password = req.body.password;
     try {
         // Make a POST request to the backend login API
-        const api_url = 'http://127.0.0.1:5001/api/login'; // Replace with your actual backend API URL
+        const api_url = API_URL + '/api/login'; // Replace with your actual backend API URL
         const response = await axios.post(api_url, { username, password });
 
         if (response.status === 200) {
@@ -147,7 +150,7 @@ function tokenRequired(req, res, next) {
     }
 }
 
-app.post('/register',async (req, res) => {
+app.post('/register', async (req, res) => {
     try {
         // Extract form data or JSON data from the frontend (adjust as needed)
         const details = {
@@ -163,7 +166,7 @@ app.post('/register',async (req, res) => {
         const data = { details };
 
         // Send the data as JSON to the backend API
-        const response = await axios.post('http://127.0.0.1:5001/api/register', data);
+        const response = await axios.post(API_URL + '/api/register', data);
 
         if (response.status === 200) {
             res.status(200).end(); // Registration successful
@@ -185,7 +188,7 @@ app.post('/reset_password', async (req, res) => {
             email: req.body.email
         }
         // Make a POST request to the backend route
-        const response = await axios.post('http://127.0.0.1:5001/reset_password', data);
+        const response = await axios.post(API_URL + '/reset_password', data);
 
         if (response.status === 200) {
             res.status(200).json({}); // 200 for success
@@ -209,7 +212,7 @@ app.post('/verify_otp', async (req, res) => {
         } // Extract data from the request
 
         // Make a POST request to the backend route
-        const response = await axios.post('http://127.0.0.1:5001/verify_otp', data);
+        const response = await axios.post(API_URL + '/verify_otp', data);
 
         if (response.status === 200) {
             res.status(200).json({}); // 200 for success
@@ -233,7 +236,7 @@ app.post('/update_password', async (req, res) => {
         } // Extract data from the request
 
         // Make a POST request to the backend route
-        const response = await axios.post('http://127.0.0.1:5001/update_password', data);
+        const response = await axios.post(API_URL + '/update_password', data);
 
         if (response.status === 200) {
             res.status(200).json({}); // 200 for success
@@ -336,7 +339,7 @@ app.post('/create_user_directory', (req, res) => {
     const data = {
         username: username
     };
-    axios.post('http://127.0.0.1:5001/api/create_user_directory', data)
+    axios.post(API_URL + '/api/create_user_directory', data)
         .then((response) => {
             console.log(response.data); // Log the response from Python
             res.status(200).json({ message: "User directory created" });
@@ -351,7 +354,7 @@ app.post('/submit_number', async (req, res) => {
     try {
         number_of_questions = parseInt(req.body.numberInput);
         console.log(number_of_questions)
-        const response = await axios.post("http://127.0.0.1:5001/api/get_num_questions", { num_questions: number_of_questions });
+        const response = await axios.post(API_URL + "/api/get_num_questions", { num_questions: number_of_questions });
 
         if (response.status === 200) {
             res.status(200).json({ message: "Selected questions successfully" });
@@ -365,7 +368,7 @@ app.post('/submit_number', async (req, res) => {
 
 app.post('/getquestionsfromapi', async (req, res) => {
     try {
-        const questionurl = 'http://127.0.0.1:5001/api/get_chosen_questions';
+        const questionurl = API_URL + '/api/get_chosen_questions';
         const response = await axios.post(questionurl);
 
         if (response.status === 200) {
@@ -407,7 +410,7 @@ app.post('/create_session', async (req, res) => {
                 console.log(data);
             }
 
-            const response = await axios.post('http://127.0.0.1:5001/api/create_session', data);
+            const response = await axios.post(API_URL + '/api/create_session', data);
 
             if (response.status === 200) {
                 const response_status = { status: 'success' };
@@ -494,7 +497,7 @@ app.get('/summary', async (req, res) => {
             };
 
             try {
-                const response = await axios.post('http://127.0.0.1:5001/api/summary', data);
+                const response = await axios.post(API_URL + '/api/summary', data);
 
                 if (response.status === 200) {
                     summaryTable.push({
@@ -515,7 +518,7 @@ app.get('/summary', async (req, res) => {
 app.get('/initialdashboard', async (req, res) => {
     try {
         console.log("1")
-        const response = await axios.get('http://127.0.0.1:5001/api/initialdashboard');
+        const response = await axios.get(API_URL + '/api/initialdashboard');
         const data = response.data;
         console.log(data)
         const usernames = data.usernames;
@@ -529,7 +532,7 @@ app.post('/get_sessions', async (req, res) => {
     try {
         const username = req.body.username;
         const data = { username };
-        const response = await axios.post("http://127.0.0.1:5001/api/get_sessions", data);
+        const response = await axios.post(API_URL + "/api/get_sessions", data);
 
         if (response.status === 200) {
             const html = response.data;
@@ -559,7 +562,7 @@ app.post('/dashboardtransactions', async (req, res) => {
         };
 
         // Send data as JSON in the request using axios
-        const response = await axios.post('http://127.0.0.1:5001/api/dashboard', data);
+        const response = await axios.post(API_URL + '/api/dashboard', data);
 
         if (response.status === 200) {
             const transaction_rows = response.data.transactions;

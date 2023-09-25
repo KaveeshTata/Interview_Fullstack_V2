@@ -1,4 +1,5 @@
 {
+    "API_URL":"http://127.0.0.1:5001",
     "LogoSource": "/Brillius_technologies.png",
     "LogoAlt": "Brillius Technologies",
     "LogoWidth": "70%",
